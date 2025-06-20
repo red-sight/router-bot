@@ -3659,21 +3659,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bullmq@npm:^5.54.3":
-  version: 5.54.3
-  resolution: "bullmq@npm:5.54.3"
-  dependencies:
-    cron-parser: "npm:^4.9.0"
-    ioredis: "npm:^5.4.1"
-    msgpackr: "npm:^1.11.2"
-    node-abort-controller: "npm:^3.1.1"
-    semver: "npm:^7.5.4"
-    tslib: "npm:^2.0.0"
-    uuid: "npm:^9.0.0"
-  checksum: 10c0/efb5ba7868e80d5b656396ea54bbe12557c0e18ce7fbcb1f19af07960839625cd24946e2b68f33b55ae4302e80d9b456653b5fbc53b7e993e793fdfba0fa7cf4
-  languageName: node
-  linkType: hard
-
 "busboy@npm:^1.0.0":
   version: 1.6.0
   resolution: "busboy@npm:1.6.0"
@@ -8844,7 +8829,6 @@ __metadata:
     "@lib/nest": "workspace:^"
     "@lib/types": "workspace:^"
     "@lib/typescript-config": "workspace:^"
-    "@nestjs/bullmq": "npm:^11.0.2"
     "@nestjs/cli": "npm:^11.0.0"
     "@nestjs/common": "npm:^11.0.1"
     "@nestjs/core": "npm:^11.0.1"
@@ -8860,7 +8844,6 @@ __metadata:
     "@types/jest": "npm:^29.5.14"
     "@types/node": "npm:^22.10.7"
     "@types/supertest": "npm:^6.0.2"
-    bullmq: "npm:^5.54.3"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.1"
     eslint: "npm:^9.22.0"

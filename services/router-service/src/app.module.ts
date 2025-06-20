@@ -1,11 +1,12 @@
 import { configShared } from "@lib/config-shared";
-import { RedisModule, RegistryClientModule } from "@lib/nest";
+import { Queue, RedisModule, RegistryClientModule } from "@lib/nest";
 import { EQueueRegistry } from "@lib/types";
-import { BullModule } from "@nestjs/bullmq";
-import { Module } from "@nestjs/common";
+import { BullModule, InjectQueue } from "@nestjs/bullmq";
+import { Module, OnApplicationBootstrap } from "@nestjs/common";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { LeasesListConsumer } from "./consumers";
 
 const redisOpts = configShared.data.redisOptions;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,15 +16,30 @@ const { keyPrefix, ...bullmqRedisOpts } = configShared.data.redisOptions;
   controllers: [AppController],
   imports: [
     RedisModule.register(redisOpts),
-    RegistryClientModule.register(),
     BullModule.forRoot({
       connection: bullmqRedisOpts,
     }),
     BullModule.registerQueue({
       connection: bullmqRedisOpts,
-      name: EQueueRegistry.registryRequests,
+      name: EQueueRegistry.routerLeasesList,
     }),
+    RegistryClientModule.register(),
   ],
-  providers: [AppService],
+  providers: [AppService, LeasesListConsumer],
 })
-export class AppModule {}
+//
+export class AppModule implements OnApplicationBootstrap {
+  constructor(
+    @InjectQueue(EQueueRegistry.routerLeasesList)
+    private leasesListQueue: Queue,
+  ) {}
+  async onApplicationBootstrap() {
+    await this.leasesListQueue.upsertJobScheduler(
+      "leases-list",
+      { every: 5000 },
+      {
+        opts: { removeOnComplete: true, removeOnFail: true },
+      },
+    );
+  }
+}
