@@ -6,7 +6,8 @@ import { Module, OnApplicationBootstrap } from "@nestjs/common";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { LeasesListConsumer } from "./consumers";
+import { LeasePingConsumer, LeasesListConsumer } from "./consumers";
+import { SshService } from "./services/ssh.service";
 
 const redisOpts = configShared.data.redisOptions;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -23,9 +24,13 @@ const { keyPrefix, ...bullmqRedisOpts } = configShared.data.redisOptions;
       connection: bullmqRedisOpts,
       name: EQueueRegistry.routerLeasesList,
     }),
+    BullModule.registerQueue({
+      connection: bullmqRedisOpts,
+      name: EQueueRegistry.routerLeasePing,
+    }),
     RegistryClientModule.register(),
   ],
-  providers: [AppService, LeasesListConsumer],
+  providers: [AppService, SshService, LeasesListConsumer, LeasePingConsumer],
 })
 //
 export class AppModule implements OnApplicationBootstrap {
@@ -36,7 +41,7 @@ export class AppModule implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     await this.leasesListQueue.upsertJobScheduler(
       "leases-list",
-      { every: 5000 },
+      { every: 60000 },
       {
         opts: { removeOnComplete: true, removeOnFail: true },
       },
