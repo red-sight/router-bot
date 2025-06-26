@@ -1,8 +1,8 @@
 import { configShared } from "@lib/config-shared";
-import { RedisModule } from "@lib/nest";
+import { Queue, RedisModule } from "@lib/nest";
 import { EQueueRegistry } from "@lib/types";
-import { BullModule } from "@nestjs/bullmq";
-import { Module } from "@nestjs/common";
+import { BullModule, InjectQueue } from "@nestjs/bullmq";
+import { Module, OnApplicationBootstrap } from "@nestjs/common";
 
 import { HealthCheckConsumer, RegistryRequestsConsumer } from "./consumers";
 import {
@@ -25,10 +25,10 @@ const { keyPrefix, ...bullmqRedisOpts } = configShared.data.redisOptions;
       connection: bullmqRedisOpts,
       name: EQueueRegistry.registryRequests,
     }),
-    // BullModule.registerQueue({
-    //   connection: bullmqRedisOpts,
-    //   name: EQueueRegistry.serviceHealthCheck,
-    // }),
+    BullModule.registerQueue({
+      connection: bullmqRedisOpts,
+      name: EQueueRegistry.serviceHealthCheck,
+    }),
   ],
   providers: [
     RegistryRequestsConsumer,
@@ -39,19 +39,18 @@ const { keyPrefix, ...bullmqRedisOpts } = configShared.data.redisOptions;
     KeycloakAuthProvider,
   ],
 })
-// implements OnApplicationBootstrap
-export class AppModule {
-  // constructor(
-  //   @InjectQueue(EQueueRegistry.serviceHealthCheck)
-  //   private healthCheckQueue: Queue,
-  // ) {}
-  // async onApplicationBootstrap() {
-  //   await this.healthCheckQueue.upsertJobScheduler(
-  //     "health-check",
-  //     { every: 5000 },
-  //     {
-  //       opts: { removeOnComplete: true, removeOnFail: true },
-  //     },
-  //   );
-  // }
+export class AppModule implements OnApplicationBootstrap {
+  constructor(
+    @InjectQueue(EQueueRegistry.serviceHealthCheck)
+    private healthCheckQueue: Queue,
+  ) {}
+  async onApplicationBootstrap() {
+    await this.healthCheckQueue.upsertJobScheduler(
+      "health-check",
+      { every: 5000 },
+      {
+        opts: { removeOnComplete: true, removeOnFail: true },
+      },
+    );
+  }
 }

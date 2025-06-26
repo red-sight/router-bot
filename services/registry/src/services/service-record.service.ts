@@ -1,9 +1,16 @@
 import { RedisService, RegisterOptionsDto } from "@lib/nest";
 import { Injectable } from "@nestjs/common";
 
+import { ApiDocService } from "./api-doc.service";
+import { KrakendGatewayProvider } from "./gateway-providers";
+
 @Injectable()
 export class ServiceRecordService {
-  constructor(private readonly redisService: RedisService) {}
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly apiDocService: ApiDocService,
+    private readonly krakendGateway: KrakendGatewayProvider,
+  ) {}
 
   readonly key = "registry:service";
 
@@ -61,6 +68,15 @@ export class ServiceRecordService {
       service,
     }));
   };
+
+  async regenerateAll() {
+    const services = await this.getServicesList();
+    const docs = await this.apiDocService.getAll(services);
+    const fullDoc = this.apiDocService.merge(docs);
+    if (!fullDoc) return;
+    await this.apiDocService.saveFullOpenApiDoc(fullDoc);
+    await this.krakendGateway.configure(docs);
+  }
 }
 
 export interface IServiceListItem {

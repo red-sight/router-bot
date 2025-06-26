@@ -24,6 +24,7 @@ const { keyPrefix, ...bullmqRedisOpts } = configShared.data.redisOptions;
       connection: bullmqRedisOpts,
       name: EQueueRegistry.routerLeasesList,
     }),
+
     BullModule.registerQueue({
       connection: bullmqRedisOpts,
       name: EQueueRegistry.routerLeasePing,

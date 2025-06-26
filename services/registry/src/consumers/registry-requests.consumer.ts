@@ -4,18 +4,13 @@ import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Job } from "bullmq";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import {
-  ApiDocService,
-  KrakendGatewayProvider,
-  ServiceRecordService,
-} from "src/services";
+import { ApiDocService, ServiceRecordService } from "src/services";
 
 @Processor(EQueueRegistry.registryRequests)
 export class RegistryRequestsConsumer extends WorkerHost {
   constructor(
     private readonly serviceRecord: ServiceRecordService,
     private readonly apiDocService: ApiDocService,
-    private readonly krakendGateway: KrakendGatewayProvider,
   ) {
     super();
   }
@@ -46,12 +41,6 @@ export class RegistryRequestsConsumer extends WorkerHost {
 
   @OnWorkerEvent("drained")
   async onCompleted() {
-    const services = await this.serviceRecord.getServicesList();
-    const docs = await this.apiDocService.getAll(services);
-    const fullDoc = this.apiDocService.merge(docs);
-    if (!fullDoc) return;
-    await this.apiDocService.saveFullOpenApiDoc(fullDoc);
-
-    await this.krakendGateway.configure(docs);
+    await this.serviceRecord.regenerateAll();
   }
 }
