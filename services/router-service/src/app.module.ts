@@ -4,8 +4,6 @@ import { EQueueRegistry } from "@lib/types";
 import { BullModule, InjectQueue } from "@nestjs/bullmq";
 import { Module, OnApplicationBootstrap } from "@nestjs/common";
 
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { LeasePingConsumer, LeasesListConsumer } from "./consumers";
 import { SshService } from "./services/ssh.service";
 
@@ -14,7 +12,6 @@ const redisOpts = configShared.data.redisOptions;
 const { keyPrefix, ...bullmqRedisOpts } = configShared.data.redisOptions;
 
 @Module({
-  controllers: [AppController],
   imports: [
     RedisModule.register(redisOpts),
     BullModule.forRoot({
@@ -24,16 +21,14 @@ const { keyPrefix, ...bullmqRedisOpts } = configShared.data.redisOptions;
       connection: bullmqRedisOpts,
       name: EQueueRegistry.routerLeasesList,
     }),
-
     BullModule.registerQueue({
       connection: bullmqRedisOpts,
       name: EQueueRegistry.routerLeasePing,
     }),
     RegistryClientModule.register(),
   ],
-  providers: [AppService, SshService, LeasesListConsumer, LeasePingConsumer],
+  providers: [SshService, LeasesListConsumer, LeasePingConsumer],
 })
-//
 export class AppModule implements OnApplicationBootstrap {
   constructor(
     @InjectQueue(EQueueRegistry.routerLeasesList)

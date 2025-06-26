@@ -25,7 +25,13 @@ export class LeasesListConsumer extends WorkerHost {
   async process() {
     const leases = await this.sshService.getLeasesList();
     console.log("leases", leases);
-    leases.forEach(lease => void this.leasePingQueue.add(lease.device, lease));
+    leases.forEach(
+      lease =>
+        void this.leasePingQueue.add(lease.device, lease, {
+          removeOnComplete: true,
+          removeOnFail: true,
+        }),
+    );
   }
 
   @OnWorkerEvent("completed")
