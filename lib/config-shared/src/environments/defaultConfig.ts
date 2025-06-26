@@ -17,22 +17,10 @@ const microserviceOptions: RmqOptions = {
       durable: true,
       // autoDelete: true,
     },
-    urls: ["amqp://localhost:5672"],
+    urls: [`amqp://localhost:${getEnvVarOrThrow("RMQ_PORT_AMQP")}`],
   },
   transport: Transport.RMQ,
 };
-// const microserviceOptions: NatsOptions = {
-//   transport: Transport.NATS,
-//   options: {
-//     url: "nats://localhost:4223",
-//     // reconnect: true,
-//     // reconnectTimeWait: 500,
-//     // maxReconnectAttempts: 10,
-//     // pingInterval: 2000,
-//     // noRandomize: true,
-//     // waitOnFirstConnect: true,
-//   },
-// };
 
 export const defaultConfig: IConfig<RmqOptions> = {
   appDescription,
@@ -55,8 +43,6 @@ export const defaultConfig: IConfig<RmqOptions> = {
 
   microserviceOptions,
 
-  // microserviceRegistryClientOptions: microserviceOptions,
-
   microserviceRegistryClientOptions: {
     ...(microserviceOptions.transport && {
       transport: microserviceOptions.transport,
@@ -70,7 +56,7 @@ export const defaultConfig: IConfig<RmqOptions> = {
   redisOptions: {
     host: "localhost",
     keyPrefix: appCode,
-    port: 6378,
+    port: parseInt(getEnvVarOrThrow("REDIS_PORT")),
   },
 
   validationPipeOptions: {},

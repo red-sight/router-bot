@@ -3,17 +3,21 @@ services:
     image: rabbitmq:4.0.7-management
     container_name: router-bot-rabbitmq
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
-      - 15672:15672
-      - 5672:5672
+      - "${RMQ_PORT_INTERFACE}:15672"
+      - "${RMQ_PORT_AMQP}:5672"
 
   krakend:
     image: devopsfaith/krakend:watch
     container_name: router-bot-krakend
     restart: unless-stopped
+    env_file:
+      - .env
     command: ["run", "-d", "-c", "/etc/krakend/krakend.json"]
     ports:
-      - 8080:8080
+      - "${KRAKEND_PORT}:8080"
     volumes:
       - ./services/registry/krakend:/etc/krakend
 
@@ -21,6 +25,22 @@ services:
     image: redis:7.4.2
     container_name: router-bot-redis
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
-      - "6378:6379"
+      - "${REDIS_PORT}:6379"
     command: redis-server --save 60 1 --loglevel warning
+
+  postgres:
+    image: postgres:17.5
+    container_name: router-bot-postgres
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/
+      HOME: /var/lib/postgresql
