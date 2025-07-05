@@ -3,6 +3,7 @@ export enum EQueueRegistry {
   serviceHealthCheck = "registry.service.health",
   routerLeasesList = "router.leases.list",
   routerLeasePing = "router.lease.ping",
+  scanNetwork = "ssh.scan-network",
 }
 
 export enum ERegistryStoreKey {
